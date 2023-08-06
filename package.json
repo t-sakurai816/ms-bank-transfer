@@ -1,0 +1,9 @@
+{
+  "name": "ms-bank-transfer",
+  "version": "1.0.0",
+  "description": "送金MS",
+  "main": "app.js",
+  "repository": "https://github.com/t-sakurai816/ms-bank-transfer.git",
+  "author": "t-sakurai816 <t.devsaku@gmail.com>",
+  "license": "MIT"
+}

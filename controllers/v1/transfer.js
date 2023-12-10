@@ -39,7 +39,7 @@ router.post('/', (req, res, next) => {
       // 送金元口座の情報を取得
       const fromAccountResponse = await fetch('http://localhost:3000/v1/accounts/' + fromAccountID)
       const fromAccount = await fromAccountResponse.json()
-      console.log(fromAccount)
+      // console.log(fromAccount)
       if (fromAccountResponse.status === 404) {
         return res.status(404).json({ error: 'NotFound' })
       }

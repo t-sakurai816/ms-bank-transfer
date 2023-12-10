@@ -1,16 +1,16 @@
 const test = require('ava')
 const supertest = require('supertest')
-// const mongoose = require('mongoose')
+const mongoose = require('mongoose')
 const express = require('express')
 const bodyParser = require('body-parser')
-// const { MongoMemoryServer } = require('mongodb-memory-server')
+const { MongoMemoryServer } = require('mongodb-memory-server')
 
 console.error = () => {}
 const router = require('../controllers/v1/transfer.js')
 // const model = require('../models/transfer.js')
 // const Account = model.Account
 
-// const mongod = new MongoMemoryServer()
+const mongod = new MongoMemoryServer()
 const app = express()
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
@@ -21,14 +21,14 @@ app.use('/transfer', router)
 // const owner1Id = new mongoose.Types.ObjectId()
 // const owner2Id = new mongoose.Types.ObjectId()
 
-// test.before(async () => {
-//   await mongod.start()
-//   const uri = mongod.getUri()
-//   await mongoose.connect(uri, {
-//     useNewUrlParser: true,
-//     useUnifiedTopology: true
-//   })
-// })
+test.before(async () => {
+  await mongod.start()
+  const uri = mongod.getUri()
+  await mongoose.connect(uri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  })
+})
 
 // // テスト用データを作成
 // test.beforeEach(async (a) => {
@@ -62,6 +62,79 @@ test.serial('get /transfer', async (t) => {
   t.is(res.status, 200)
   t.deepEqual(res.body, { message: 'success!!' })
 })
+
+// GET /v1/transfer/:accountID
+// 送る相手の情報を取得する
+test.serial('GET 送る相手の情報を取得', async (t) => {
+  const res = await supertest(app).get('/transfer/656c96e98a40d07f8a7f68ec')
+  // console.log('res.body: ', res.body)
+  t.is(res.status, 200)
+  t.is(Object.keys(res.body).length, 6)
+})
+
+test.serial('GET 送り先の口座番号がない', async (t) => {
+  const res = await supertest(app).get('/transfer/656c96e98a40d07f8a7f68ee')
+  // console.log('res.body: ', res.body)
+  t.is(res.status, 200)
+  t.deepEqual(res.body, { error: 'NotFound' })
+})
+
+// POST /v1/transfer
+test.serial('POST /transfer', async (t) => {
+  const requestBody = {
+    fromAccountID: '9b4681fc66a71435c2c1270a',
+    toAccountID: '656c96e98a40d07f8a7f68ec',
+    amount: 10
+  }
+  const res = await supertest(app).post('/transfer').send(requestBody)
+  // console.log(res)
+  t.is(res.status, 200)
+  t.deepEqual(res.body, { message: 'success!!' })
+})
+
+// // POST /v1/transfer is err
+test.serial('POST /transfer 残高不足', async (t) => {
+  const requestBody = {
+    fromAccountID: '9b4681fc66a71435c2c1270a',
+    toAccountID: '656c96e98a40d07f8a7f68ec',
+    amount: 10000000000
+  }
+  const res = await supertest(app).post('/transfer').send(requestBody)
+  // console.log(res)
+  t.is(res.status, 400)
+  t.deepEqual(res.body, { error: '残高不足です' })
+})
+
+test.serial('POST /transfer 送金元口座がない', async (t) => {
+  const requestBody = {
+    fromAccountID: '9b4681fc66a71435c2c1270b',
+    toAccountID: '656c96e98a40d07f8a7f68ec',
+    amount: 10
+  }
+  const res = await supertest(app).post('/transfer').send(requestBody)
+  // console.log(res)
+  t.is(res.status, 404)
+  t.deepEqual(res.body, { error: 'NotFound' })
+})
+
+test.serial('POST /transfer 送金先口座がない', async (t) => {
+  const requestBody = {
+    fromAccountID: '9b4681fc66a71435c2c1270a',
+    toAccountID: '656c96e98a40d07f8a7f68ed',
+    amount: 10
+  }
+  const res = await supertest(app).post('/transfer').send(requestBody)
+  // console.log(res)
+  t.is(res.status, 404)
+  t.deepEqual(res.body, { error: 'NotFound' })
+})
+
+// test.serial('post /transfer is err', async (t) => {
+//   const req = { body: 'invailed' }
+//   const res = await supertest(app).post('/transfer').send(req)
+//   t.is(res.status, 400)
+//   t.deepEqual(res.body, { error: 'BadRequest' })
+// })
 
 // // GET /v1/transfer/:accountID
 // test.serial('get /transfer/:accountID', async (t) => {

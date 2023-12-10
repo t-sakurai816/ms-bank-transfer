@@ -3,10 +3,10 @@ const Schema = mongoose.Schema
 
 const transferSchema = new Schema(
   {
-    accountID: { type: Schema.Types.ObjectId, required: true, unique: true },
-    accountType: { type: String, required: true },
-    balance: { type: Number, required: true },
-    ownerID: { type: String, required: true }
+    fromAccountID: { type: String, required: true },
+    toAccountID: { type: String, required: true },
+    amount: { type: Number, required: true },
+    timestamp: { type: Date, required: true }
   },
   {
     versionKey: false

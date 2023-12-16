@@ -14,7 +14,7 @@ router.get('/:fromAccountID', (req, res, next) => {
     try {
       const { fromAccountID } = req.params
       // 送金元口座の情報を取得
-      const fromAccountResponse = await fetch('http://localhost:3000/v1/accounts/' + fromAccountID)
+      const fromAccountResponse = await fetch('http://accounts:3000/v1/accounts/' + fromAccountID)
       const fromAccount = await fromAccountResponse.json()
       if (fromAccount) {
         // console.log(fromAccount)
@@ -37,7 +37,7 @@ router.post('/', (req, res, next) => {
       const { fromAccountID, toAccountID, amount } = req.body
 
       // 送金元口座の情報を取得
-      const fromAccountResponse = await fetch('http://localhost:3000/v1/accounts/' + fromAccountID)
+      const fromAccountResponse = await fetch('http://accounts:3000/v1/accounts/' + fromAccountID)
       const fromAccount = await fromAccountResponse.json()
       // console.log(fromAccount)
       if (fromAccountResponse.status === 404) {
@@ -49,7 +49,7 @@ router.post('/', (req, res, next) => {
       }
 
       // 送金先口座の情報を取得
-      const toAccountResponse = await fetch('http://localhost:3000/v1/accounts/' + toAccountID)
+      const toAccountResponse = await fetch('http://accounts:3000/v1/accounts/' + toAccountID)
       const toAccount = await toAccountResponse.json()
       if (toAccountResponse.status === 404) {
         return res.status(404).json({ error: 'NotFound' })
@@ -66,7 +66,7 @@ router.post('/', (req, res, next) => {
 
       // 送金元口座の残高を更新
       fromAccount.balance -= amount
-      const fromAccountUpdateResponse = await fetch('http://localhost:3000/v1/accounts/' + fromAccountID, {
+      const fromAccountUpdateResponse = await fetch('http://accounts:3000/v1/accounts/' + fromAccountID, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -81,7 +81,7 @@ router.post('/', (req, res, next) => {
 
       // 送金先口座の残高を更新
       toAccount.balance += amount
-      const toAccountUpdateResponse = await fetch('http://localhost:3000/v1/accounts/' + toAccountID, {
+      const toAccountUpdateResponse = await fetch('http://accounts:3000/v1/accounts/' + toAccountID, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -91,7 +91,7 @@ router.post('/', (req, res, next) => {
       // レスポンスのステータスコードをチェック
       if (!toAccountUpdateResponse.ok) {
         // レスポンスが成功でない場合、エラーを返す
-        return res.status(toAccountUpdateResponse.status).json({ error: '送金元口座の更新に失敗しました' })
+        return res.status(toAccountUpdateResponse.status).json({ error: '送金先口座の更新に失敗しました' })
       }
 
       return res.status(200).json({ message: 'success!!' })

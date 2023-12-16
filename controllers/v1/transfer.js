@@ -35,14 +35,14 @@ router.post('/', (req, res, next) => {
     try {
       // TODO: 送金の正しいリクエストを送る
       const { fromAccountID, toAccountID, amount } = req.body
+      console.log('fromAccountID:', fromAccountID)
+      console.log('toAccountID:', toAccountID)
+      console.log('amount:', amount)
+
       // リクエストボディの値が存在するかをチェック
       if (!fromAccountID || !toAccountID || amount === undefined) {
         return res.status(400).json({ error: '不足しているリクエストパラメータがあります' })
       }
-
-      console.log('fromAccountID:', fromAccountID)
-      console.log('toAccountID:', toAccountID)
-      console.log('amount:', amount)
 
       // 送金元口座の情報を取得
       const fromAccountResponse = await fetch('http://accounts:3000/v1/accounts/' + fromAccountID)
